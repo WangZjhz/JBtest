@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成型智能排产系统 - 数字化转型案例</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --background-light: #F9FAFB;
+            --background-dark: #111827;
+            --text-light: #1F2937;
+            --text-dark: #F3F4F6;
+            --card-light: #FFFFFF;
+            --card-dark: #1F2937;
+            --border-light: #E5E7EB;
+            --border-dark: #374151;
+        }
+        
+        .dark {
+            --primary: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary: #34D399;
+            --accent: #FBBF24;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: var(--background-light);
+            color: var(--text-light);
+        }
+        
+        body.dark {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+        
+        .card {
+            background-color: var(--card-light);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .card {
+            background-color: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn {
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .dark th, .dark td {
+            border-color: var(--border-dark);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            font-weight: bold;
+        }
+        
+        .highlight-box {
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+        
+        .last-produced {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--secondary);
+        }
+        
+        .current-selected {
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 1px solid var(--accent);
+        }
+        
+        .process-arrow {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        
+        @media (max-width: 640px) {
+            .step-number {
+                width: 1.5rem;
+                height: 1.5rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body class="scroll-smooth">
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        <i class="fas fa-industry mr-2"></i>成型智能排产系统
+                    </span>
+                </div>
+                <div class="flex items-center">
+                    <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header class="bg-gradient-to-r from-blue-500 to-teal-500 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">滤棒成型智能排产系统</h1>
+            <p class="text-xl md:text-2xl max-w-3xl">利用人工智能技术实现滤棒生产的智能排程，提高生产效率，降低人工操作复杂度</p>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- 项目概述 -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
+                <i class="fas fa-clipboard-list text-blue-500 mr-3"></i>项目概述
+            </h2>
+            <div class="card p-6 rounded-xl">
+                <p class="mb-4">成型智能排产系统是一个通过数据驱动和人工智能技术，实现滤棒生产智能排程的数字化应用。该系统将原本专业性强、复杂度高的排产工作简化为可视化操作，使生产管理人员能够轻松完成日常排产任务。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
+                            <h3 class="font-bold">智能日期管理</h3>
+                        </div>
+                        <p class="text-sm">自动根据节假日、周末、停产规则确定生产计划日期</p>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-database text-green-500 mr-2"></i>
+                            <h3 class="font-bold">数据整合分析</h3>
+                        </div>
+                        <p class="text-sm">整合历史生产数据、机器能力数据和需求计划数据</p>
+                    </div>
+                    <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-robot text-yellow-500 mr-2"></i>
+                            <h3 class="font-bold">AI辅助决策</h3>
+                        </div>
+                        <p class="text-sm">大模型驱动的智能排产推荐，兼顾生产效率与资源利用</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 系统工作流程 -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
+                <i class="fas fa-sitemap text-blue-500 mr-3"></i>系统工作流程
+            </h2>
+            <div class="card p-6 rounded-xl">
+                <div class="flex flex-col space-y-8">
+                    <!-- 确定关键日期 -->
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex items-start md:w-1/4">
+                            <div class="step-number mr-4">1</div>
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">确定关键日期</h3>
+                        </div>
+                        <div class="md:w-3/4 pl-10 md:pl-0 highlight-box mt-2 md:mt-0">
+                            <ul class="space-y-2">
+                                <li><span class="font-medium">排产日期（specified_date）</span>：选择成型机的排产日期</li>
+                                <li><span class="font-medium">下一工作日（next_date）</span>：根据周末、节假日、停产等规则，确定specified_date的下一工作日，用于获取卷包生产计划，计算滤棒需求</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center process-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- 数据查询 -->
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex items-start md:w-1/4">
+                            <div class="step-number mr-4">2</div>
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">数据查询</h3>
+                        </div>
+                        <div class="md:w-3/4 pl-10 md:pl-0 highlight-box mt-2 md:mt-0">
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">查询1：表A - 成型机可以生产的滤棒规格及生产能力</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm">
+                                        <li>分析历史产量数据和机器基础信息</li>
+                                        <li>计算生产能力，考虑折算系数和5%的生产消耗</li>
+                                        <li>生成各成型机可生产的滤棒规格及日产格数</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">查询2：表B - 成型机前一次生产的滤棒规格</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm">
+                                        <li>筛选日期小于排产日期且滤棒规格不为空的记录</li>
+                                        <li>按机号分组，记录按日期降序、班次优先级排序</li>
+                                        <li>获取每台成型机最近生产的滤棒规格</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">查询3：表C - 下一工作日滤棒需求</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm">
+                                        <li>获取下一工作日的卷烟机生产计划</li>
+                                        <li>计算对应滤棒规格需求量</li>
+                                        <li>汇总各规格的滤棒需求格数</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center process-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- 排产规则与提示 -->
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex items-start md:w-1/4">
+                            <div class="step-number mr-4">3</div>
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">排产规则应用</h3>
+                        </div>
+                        <div class="md:w-3/4 pl-10 md:pl-0 highlight-box mt-2 md:mt-0">
+                            <div class="space-y-3">
+                                <p class="font-medium">系统根据以下核心规则生成排产计划：</p>
+                                <ul class="space-y-2">
+                                    <li>✓ 早班7.67小时，中班7小时，日均衡生产</li>
+                                    <li>✓ 优先保持机组生产滤棒规格的延续性</li>
+                                    <li>✓ 特殊滤棒规格优先安排，不足部分外购</li>
+                                    <li>✓ 产量与需求量匹配控制在±5%范围内</li>
+                                    <li>✓ K01、K15、K16等老旧机组避免安排生产</li>
+                                    <li>✓ 每台设备一天最多安排早班和中班</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center process-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- 大模型调用 -->
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex items-start md:w-1/4">
+                            <div class="step-number mr-4">4</div>
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">大模型调用</h3>
+                        </div>
+                        <div class="md:w-3/4 pl-10 md:pl-0 highlight-box mt-2 md:mt-0">
+                            <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg">
+                                <p class="mb-3">系统将表A、B、C的查询结果和排产规则作为输入，调用本地部署的大模型，生成JSON格式的排产计划。</p>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-md text-sm font-mono overflow-x-auto">
+                                    <pre>[
+  {
+    "机号": "K01",
+    "班次": "早班",
+    "生产规格": "LBCG2600",
+    "是否延续": "是"
+  },
+  {
+    "机号": "K01",
+    "班次": "中班",
+    "生产规格": "LBCG2B00",
+    "是否延续": "否"
+  }
+]</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 系统界面设计 -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
+                <i class="fas fa-desktop text-blue-500 mr-3"></i>系统界面设计
+            </h2>
+            <div class="card p-6 rounded-xl">
+                <p class="mb-6">成型机排产管理页面由三个核心模块组成，使排产过程可视化、直观且易于操作</p>
+                
+                <!-- 界面模块展示 -->
+                <div class="grid grid-cols-1 gap-8">
+                    <!-- 模块1 -->
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                        <h3 class="text-lg font-bold mb-3 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">1</span>
+                            成型机组排产确认
+                        </h3>
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                            <div class="bg-white dark:bg-gray-900 p-4">
+                                <div class="flex flex-col md:flex-row gap-4">
+                                    <div class="md:w-1/3">
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                            <div class="text-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md mb-2">日历选择器</div>
+                                            <div class="grid grid-cols-7 gap-1 text-center">
+                                                <div class="text-xs text-gray-500">日</div>
+                                                <div class="text-xs text-gray-500">一</div>
+                                                <div class="text-xs text-gray-500">二</div>
+                                                <div class="text-xs text-gray-500">三</div>
+                                                <div class="text-xs text-gray-500">四</div>
+                                                <div class="text-xs text-gray-500">五</div>
+                                                <div class="text-xs text-gray-500">六</div>
+                                                <!-- 示例日期 -->
+                                                <div class="text-xs p-1">1</div>
+                                                <div class="text-xs p-1">2</div>
+                                                <div class="text-xs p-1">3</div>
+                                                <div class="text-xs p-1">4</div>
+                                                <div class="text-xs p-1">5</div>
+                                                <div class="text-xs p-1 bg-blue-100 dark:bg-blue-800 rounded-full">6</div>
+                                                <div class="text-xs p-1 text-gray-400">7</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="md:w-2/3">
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                            <div class="text-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md mb-2">机组排产确认表</div>
+                                            <div class="text-sm">
+                                                <div class="grid grid-cols-3 gap-2 font-medium p-2 bg-gray-50 dark:bg-gray-800">
+                                                    <div>机号</div>
+                                                    <div>早班</div>
+                                                    <div>中班</div>
+                                                </div>
+                                                <div class="grid grid-cols-3 gap-2 p-2 border-b border-gray-100 dark:border-gray-800">
+                                                    <div>K01</div>
+                                                    <div>LBCG2600</div>
+                                                    <div>LBCG2B00</div>
+                                                </div>
+                                                <div class="grid grid-cols-3 gap-2 p-2 border-b border-gray-100 dark:border-gray-800">
+                                                    <div>K02</div>
+                                                    <div>LBCH3510</div>
+                                                    <div>LBCH3510</div>
+                                                </div>
+                                                <div class="grid grid-cols-3 gap-2 p-2">
+                                                    <div>K03</div>
+                                                    <div>LBCK2201</div>
+                                                    <div>-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块2 -->
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                        <h3 class="text-lg font-bold mb-3 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">2</span>
+                            成型生产安排表
+                        </h3>
+                        <div class="table-container">
+                            <table class="w-full bg-white dark:bg-gray-900 shadow-sm rounded-lg overflow-hidden">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-800">
+                                        <th>机号</th>
+                                        <th>LBCG2600</th>
+                                        <th>LBCG2B00</th>
+                                        <th>LBCH3510</th>
+                                        <th>LBCK2201</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>K01</td>
+                                        <td class="last-produced rounded-md">48.5</td>
+                                        <td class="current-selected rounded-md">52.3</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K02</td>
+                                        <td>51.2</td>
+                                        <td>-</td>
+                                        <td class="last-produced current-selected rounded-md">55.8</td>
+                                        <td>-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K03</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td class="last-produced current-selected rounded-md">49.7</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex flex-wrap gap-3 mt-4 text-sm">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 mr-2 last-produced"></div>
+                                <span>上次生产规格</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 mr-2 current-selected"></div>
+                                <span>当前排产规格</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块3 -->
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                        <h3 class="text-lg font-bold mb-3 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">3</span>
+                            卷烟滤棒需求与成型生产能力对照表
+                        </h3>
+                        <div class="table-container">
+                            <table class="w-full bg-white dark:bg-gray-900 shadow-sm rounded-lg overflow-hidden">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-800">
+                                        <th>滤棒规格</th>
+                                        <th>滤棒名称</th>
+                                        <th>需求量</th>
+                                        <th>生产量</th>
+                                        <th>相差值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>LBCG2600</td>
+                                        <td>普通双嘴滤棒</td>
+                                        <td>45.6</td>
+                                        <td>48.5</td>
+                                        <td class="text-green-500">+2.9</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCG2B00</td>
+                                        <td>普通双嘴滤棒(B型)</td>
+                                        <td>50.2</td>
+                                        <td>52.3</td>
+                                        <td class="text-green-500">+2.1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCH3510</td>
+                                        <td>空心滤棒</td>
+                                        <td>110.4</td>
+                                        <td>111.6</td>
+                                        <td class="text-green-500">+1.2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCK2201</td>
+                                        <td>细支滤棒</td>
+                                        <td>52.3</td>
+                                        <td>49.7</td>
+                                        <td class="text-red-500">-2.6</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 操作流程 -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
+                <i class="fas fa-tasks text-blue-500 mr-3"></i>操作流程
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 人工快速排产 -->
+                <div class="card p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 mr-3">
+                            <i class="fas fa-user-cog text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">人工快速排产</h3>
+                    </div>
+                    <ol class="space-y-3 ml-6 list-decimal">
+                        <li>选择日期和班次后，系统显示各滤棒规格的需求量</li>
+                        <li>点击某规格滤棒，该规格在表格中变为红字提示</li>
+                        <li>优先选择红字位于绿色框的成型机生产该规格滤棒</li>
+                        <li>点击后滤棒底色变为黄色，表示该成型机当班预排</li>
+                        <li>生产量和相差值随排产动态更新</li>
+                        <li>反复调整排产计划，直至满足生产需求</li>
+                        <li>确定最终排产计划后，点击【排产确认】完成</li>
+                    </ol>
+                </div>
+                
+                <!-- AI智能排产 -->
+                <div class="card p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 mr-3">
+                            <i class="fas fa-robot text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">AI智能排产</h3>
+                    </div>
+                    <ol class="space-y-3 ml-6 list-decimal">
+                        <li>选择日期和班次后，点击【AI智能排产】按钮</li>
+                        <li>AI自动生成预排结果，显示于各表格中</li>
+                        <li>管理人员检查相差值过高或过低的规格</li>
+                        <li>根据需要进行手动微调，与人工排产操作相同</li>
+                        <li>调整至满足生产需求后，点击【排产确认】</li>
+                        <li>最终排产结果显示在【成型机组排产确认】界面</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 系统价值 -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
+                <i class="fas fa-chart-line text-blue-500 mr-3"></i>系统价值
+            </h2>
+            <div class="card p-6 rounded-xl">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg">
+                        <div class="text-center mb-4">
+                            <span class="inline-block p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300">
+                                <i class="fas fa-cogs text-3xl"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-center mb-3">提高生产效率</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>减少机组更换规格频率，提高设备利用率</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>精准匹配需求与产能，减少库存积压</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>及时发现产能缺口，提前采取补救措施</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg">
+                        <div class="text-center mb-4">
+                            <span class="inline-block p-3 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300">
+                                <i class="fas fa-user-tie text-3xl"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-center mb-3">降低管理复杂度</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>将专业性强的排产工作简化为可视化操作</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>减少人工计算和决策失误风险</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>降低管理人员专业技能要求，加快培训周期</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg">
+                        <div class="text-center mb-4">
+                            <span class="inline-block p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300">
+                                <i class="fas fa-lightbulb text-3xl"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-center mb-3">智能决策支持</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>AI自动排产建议，兼顾多种生产约束</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>历史数据分析，持续优化生产模型</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>人机协作模式，保留人工调整灵活性</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 dark:bg-gray-900 py-8 border-t border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">作者信息</h3>
+                <p class="text-gray-600 dark:text-gray-400">作者姓名: 卷包车间</p>
+                <p class="text-gray-600 dark:text-gray-400">© 2025 成型智能排产系统 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 主题切换
+        const themeToggle = document.getElementById('theme-toggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // 初始化主题
+        if (prefersDark) {
+            document.body.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+        });
+        
+        // 动画效果
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        fadeElements.forEach(element => {
+            element.style.opacity = 0;
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+            observer.observe(element);
+        });
+    </script>
+</body>
+</html>
