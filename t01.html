@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《仙逆》精彩世界</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: #f0f0f0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100vh;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .slide-1 {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        }
+        
+        .slide-2 {
+            background: linear-gradient(135deg, #16222a, #3a6073);
+        }
+        
+        .slide-3 {
+            background: linear-gradient(135deg, #603813, #b29f94);
+        }
+        
+        .slide-4 {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+        }
+        
+        .slide-5 {
+            background: linear-gradient(135deg, #141e30, #243b55);
+        }
+        
+        .slide-6 {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        }
+        
+        .slide-7 {
+            background: linear-gradient(135deg, #23074d, #cc5333);
+        }
+        
+        .slide-8 {
+            background: linear-gradient(135deg, #ad5389, #3c1053);
+        }
+        
+        .slide-9 {
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+        }
+        
+        .slide-10 {
+            background: linear-gradient(135deg, #000428, #004e92);
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-50px);
+            transition: all 1s ease;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 1s ease 0.3s;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease 0.6s;
+        }
+        
+        .character {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+        }
+        
+        .character-item {
+            width: 180px;
+            margin: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+        
+        .character-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 2rem;
+        }
+        
+        .character-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .character-desc {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .cultivation-system {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .cultivation-level {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: left;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.5s ease;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            z-index: 100;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background: #fff;
+        }
+        
+        .world-map {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            position: relative;
+            margin: 20px 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+        }
+        
+        .location {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .location:hover {
+            transform: scale(1.3) !important;
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+        
+        .location:nth-child(1) {
+            top: 30%;
+            left: 20%;
+            transition-delay: 1.0s;
+        }
+        
+        .location:nth-child(2) {
+            top: 60%;
+            left: 40%;
+            transition-delay: 1.2s;
+        }
+        
+        .location:nth-child(3) {
+            top: 20%;
+            left: 70%;
+            transition-delay: 1.4s;
+        }
+        
+        .location:nth-child(4) {
+            top: 70%;
+            left: 80%;
+            transition-delay: 1.6s;
+        }
+        
+        .location:nth-child(5) {
+            top: 40%;
+            left: 50%;
+            transition-delay: 1.8s;
+        }
+        
+        .quote {
+            font-style: italic;
+            font-size: 1.8rem;
+            max-width: 800px;
+            line-height: 1.6;
+            margin: 2rem 0;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+        }
+        
+        .timeline {
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            margin: 40px 0;
+            padding-top: 20px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 0%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: height 2s ease;
+        }
+        
+        .timeline-item {
+            width: 45%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 30px;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            margin-left: auto;
+            transform: translateX(50px);
+        }
+        
+        .timeline-item:nth-child(even) {
+            transform: translateX(-50px);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .timeline-item:nth-child(odd)::before {
+            left: -30px;
+        }
+        
+        .timeline-item:nth-child(even)::before {
+            right: -30px;
+        }
+        
+        .timeline-year {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .artifact {
+            width: 180px;
+            margin: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transform: rotateY(90deg);
+            transition: all 0.6s ease;
+        }
+        
+        .artifact-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 2rem;
+        }
+        
+        .artifacts-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .character-item {
+                width: calc(50% - 30px);
+            }
+            
+            .timeline-item {
+                width: 80%;
+                margin-left: 10% !important;
+                transform: translateX(0) !important;
+            }
+            
+            .timeline::before {
+                left: 10%;
+            }
+            
+            .timeline-item::before {
+                left: -30px !important;
+                right: auto !important;
+            }
+            
+            .world-map {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .character-item {
+                width: 100%;
+            }
+            
+            .artifact {
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 第1页 - 封面 -->
+        <div class="slide slide-1 active">
+            <h1>仙逆</h1>
+            <h2>执著于道，风云终成我辈</h2>
+            <p>一个平凡少年王林，踏上了修仙之旅，从一个卑微的炼丹童子成长为撼动星河的逆修，这是一个命运多舛却又热血燃烧的传奇故事。</p>
+        </div>
+        
+        <!-- 第2页 - 主角介绍 -->
+        <div class="slide slide-2">
+            <h2>主要人物</h2>
+            <p>《仙逆》中的人物性格鲜明，各具魅力，他们的命运交织构成了这部宏大的修仙史诗。</p>
+            <div class="character">
+                <div class="character-item">
+                    <div class="character-icon">王</div>
+                    <div class="character-name">王林</div>
+                    <div class="character-desc">原本是一个平凡的少年，为追寻梦想踏上修仙路，最终成为了震惊星域的逆修强者。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">刘</div>
+                    <div class="character-name">刘丹</div>
+                    <div class="character-desc">王林的启蒙恩师，赵国朱雀宗的外门炼丹长老，待王林如己出。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">王</div>
+                    <div class="character-name">王平</div>
+                    <div class="character-desc">王林的父亲，朱雀宗外门弟子，为人踏实勤恳，是王林最初的榜样。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">司</div>
+                    <div class="character-name">司徒南</div>
+                    <div class="character-desc">古魔传人，与王林结为莫逆之交，性格狂放不羁。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">李</div>
+                    <div class="character-name">李慕婉</div>
+                    <div class="character-desc">王林的初恋，朱雀宗内门弟子，温婉贤淑，与王林青梅竹马。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">孟</div>
+                    <div class="character-name">孟浩</div>
+                    <div class="character-desc">王林的劲敌之一，朱雀宗天才弟子，后成为全修时代的领军人物之一。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">周</div>
+                    <div class="character-name">周紫阳</div>
+                    <div class="character-desc">望月国炼丹大师，王林的炼丹师父，对王林恩重如山。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">墨</div>
+                    <div class="character-name">墨鼎真人</div>
+                    <div class="character-desc">朱雀宗玄罗峰的峰主，朱雀宗中的元婴修士，实力强大。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第3页 - 修行体系 -->
+        <div class="slide slide-3">
+            <h2>修行体系</h2>
+            <p>《仙逆》中的修行体系极为完整，由凡人到仙人，一步步攀登而上，每一个境界都有其特色。</p>
+            <div class="cultivation-system">
+                <div class="cultivation-level">
+                    <strong>炼气期：</strong> 修行的起点，分为初级、中级、高级，每级又有九层小境界。
+                </div>
+                <div class="cultivation-level">
+                    <strong>筑基期：</strong> 突破炼气后的境界，拥有更强的法力和寿元，分为初期、中期、后期、大圆满。
+                </div>
+                <div class="cultivation-level">
+                    <strong>结丹期：</strong> 体内凝聚元婴的前身——金丹，寿元大增，实力大涨。
+                </div>
+                <div class="cultivation-level">
+                    <strong>元婴期：</strong> 金丹化婴，法力精纯，威能倍增，可脱离本体行动。
+                </div>
+                <div class="cultivation-level">
+                    <strong>化神期：</strong> 元婴化神，肉身与元神融合，蜕变为更高等的存在。
+                </div>
+                <div class="cultivation-level">
+                    <strong>婴变期：</strong> 超越化神后的阶段，肉身与神识融合度更高。
+                </div>
+                <div class="cultivation-level">
+                    <strong>问鼎期：</strong> 向天问鼎，拥有撼动天地的伟力。
+                </div>
+                <div class="cultivation-level">
+                    <strong>碎涅期：</strong> 碎涅飞升，修为通天彻地，直指仙界。
+                </div>
+                <div class="cultivation-level">
+                    <strong>古神、古妖、古魔：</strong> 三大至高种族，拥有无尽的神通与寿元。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第4页 - 世界观 -->
+        <div class="slide slide-4">
+            <h2>仙逆世界观</h2>
+            <p>《仙逆》构建了一个庞大而精细的世界观，包括三大星域、诸多国家和宗门势力，世界观融合了东方道家思想与独特的奇幻元素。</p>
+            <div class="world-map">
+                <div class="location" title="朱雀国"></div>
+                <div class="location" title="望月国"></div>
+                <div class="location" title="蛮荒星域"></div>
+                <div class="location" title="金光大陆"></div>
+                <div class="location" title="天逆珠"></div>
+            </div>
+            <p>从赵国朱雀宗到蛮荒星域，从金光大陆到逆修联盟，王林的足迹遍布这庞大的修仙世界。这是一个充满机遇与危险的世界，灵气遍布，仙术流传，古老的传承与现代的修仙文明交相辉映。</p>
+        </div>
+        
+        <!-- 第5页 - 经典语录 -->
+        <div class="slide slide-5">
+            <h2>经典语录</h2>
+            <div class="quote">"我命由我不由天，既然无法逆转天意，那便逆天而行！"</div>
+            <div class="quote">"修仙者，逆天而行，终有一日，我王林当站在群星之巅，俯视天地！"</div>
+            <div class="quote">"这世间最难忘的，莫过于初见的容颜，最难以忘怀的，莫过于刻骨的思念。"</div>
+            <div class="quote">"欲要修道，先修人心。欲要长生，先悟生死。"</div>
+            <div class="quote">"我的剑，不是最快的剑，但却是最坚定的剑！"</div>
+        </div>
+        
+        <!-- 第6页 - 时间线 -->
+        <div class="slide slide-6">
+            <h2>王林修仙之路</h2>
+            <p>从凡人少年到逆修强者，王林的道路充满坎坷与辉煌。</p>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">踏入修仙</div>
+                    王林初入朱雀宗，成为炼丹童子，结识李慕婉，立下修仙志向。
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">流落蛮荒</div>
+                    因资质问题无法修炼，王林被逐出朱雀宗，流落蛮荒之地，获得天逆珠。
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">道基初成</div>
+                    在蛮荒星域中，王林获得古老传承，成功凝聚道基，开始了真正的修仙之路。
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">屠妖证道</div>
+                    王林在妖灵之地斩妖除魔，修为突飞猛进，声名开始在修仙界传播。
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">逆修崛起</div>
+                    创立逆修之道，与仙界为敌，组建逆修联盟，成为星域中的传奇人物。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第7页 - 法宝与神通 -->
+        <div class="slide slide-7">
+            <h2>法宝与神通</h2>
+            <p>《仙逆》中的法宝与神通种类繁多，各具特色，是修仙者最重要的依仗之一。</p>
+            <div class="artifacts-container">
+                <div class="artifact">
+                    <div class="artifact-icon">珠</div>
+                    <div class="character-name">天逆珠</div>
+                    <div class="character-desc">王林最重要的法宝，蕴含无穷奥秘，是其一路修仙的重要凭依。</div>
+                </div>
+                <div class="artifact">
+                    <div class="artifact-icon">古</div>
+                    <div class="character-name">古神之眼</div>
+                    <div class="character-desc">来自远古的神秘法宝，拥有通天的观察能力和强大的攻击力。</div>
+                </div>
+                <div class="artifact">
+                    <div class="artifact-icon">剑</div>
+                    <div class="character-name">七彩剑气</div>
+                    <div class="character-desc">王林所修炼的强大剑气，可分化为七色，威力无穷。</div>
+                </div>
+                <div class="artifact">
+                    <div class="artifact-icon">符</div>
+                    <div class="character-name">雷符</div>
+                    <div class="character-desc">王林精通的符箓之一，召唤天雷攻击敌人。</div>
+                </div>
+                <div class="artifact">
+                    <div class="artifact-icon">旗</div>
+                    <div class="character-name">四灵旗</div>
+                    <div class="character-desc">青龙、白虎、朱雀、玄武四面灵旗，布阵可困敌杀敌。</div>
+                </div>
+                <div class="artifact">
+                    <div class="artifact-icon">印</div>
+                    <div class="character-name">古神印</div>
+                    <div class="character-desc">蕴含古神之力的神秘法印，威力无穷。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第8页 - 重要宗门 -->
+        <div class="slide slide-8">
+            <h2>重要宗门与势力</h2>
+            <p>《仙逆》世界中的宗门林立，势力错综复杂，各大宗门在修仙界中扮演着重要角色。</p>
+            <div class="character">
+                <div class="character-item">
+                    <div class="character-icon">朱</div>
+                    <div class="character-name">朱雀宗</div>
+                    <div class="character-desc">赵国最强大的修仙宗门，以朱雀为图腾，分为内外两门。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">灵</div>
+                    <div class="character-name">灵溪宗</div>
+                    <div class="character-desc">望月国的一流宗门，炼丹术闻名遐迩。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">逆</div>
+                    <div class="character-name">逆修联盟</div>
+                    <div class="character-desc">由王林创立，集结了众多反抗仙界的修士。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">古</div>
+                    <div class="character-name">古神一族</div>
+                    <div class="character-desc">远古三大种族之一，拥有无上神力。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">魔</div>
+                    <div class="character-name">古魔一族</div>
+                    <div class="character-desc">远古三大种族之一，以魔道修行著称。</div>
+                </div>
+                <div class="character-item">
+                    <div class="character-icon">妖</div>
+                    <div class="character-name">古妖一族</div>
+                    <div class="character-desc">远古三大种族之一，形态多变，神通广大。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第9页 - 战斗系统 -->
+        <div class="slide slide-9">
+            <h2>战斗与修炼</h2>
+            <p>《仙逆》中的战斗描写精彩纷呈，修炼方式多种多样，每个修士都有自己独特的修炼之路。</p>
+            <div class="cultivation-system">
+                <div class="cultivation-level">
+                    <strong>法术：</strong> 修士最基本的攻击手段，如火球术、雷霆术等。
+                </div>
+                <div class="cultivation-level">
+                    <strong>符箓：</strong> 将法力注入符纸，可以储存法术效果，是修士常用的攻防手段。
+                </div>
+                <div class="cultivation-level">
+                    <strong>禁制：</strong> 高级修士可以布置禁制，用于防御、攻击或者困敌。
+                </div>
+                <div class="cultivation-level">
+                    <strong>阵法：</strong> 将多种法术或法宝组合在一起，形成威力更强大的战斗体系。
+                </div>
+                <div class="cultivation-level">
+                    <strong>神通：</strong> 高级修士掌握的超凡能力，如瞬移、分身等。
+                </div>
+                <div class="cultivation-level">
+                    <strong>炼丹：</strong> 通过炼制丹药辅助修炼，是修士提升实力的重要手段。
+                </div>
+                <div class="cultivation-level">
+                    <strong>炼器：</strong> 打造各种法宝兵器，增强修士的战斗力。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第10页 - 结语 -->
+        <div class="slide slide-10">
+            <h2>修仙路漫漫，逆天而行</h2>
+            <div class="quote">"我欲修仙，即便仙路艰难，我王林亦当一路逆行，拼尽全力，登临绝巅！"</div>
+            <p>《仙逆》不仅仅是一部修仙小说，更是一部关于坚持、勇气和逆境成长的史诗。王林的故事告诉我们，无论面对怎样的困难，都要保持坚定的信念，逆流而上，终有一日，可以站在命运的制高点，掌握自己的人生。</p>
+            <p>在这个奇幻的修仙世界中，我们看到了人性的光辉与黑暗，感受到了亲情、友情与爱情的珍贵，体会到了为梦想而奋斗的意义。这就是《仙逆》带给我们的精神财富，也是其经久不衰的魅力所在。</p>
+        </div>
+        
+        <!-- 导航按钮 -->
+        <div class="navigation">
+            <button class="nav-btn prev">&lt;</button>
+            <button class="nav-btn next">&gt;</button>
+        </div>
+        
+        <!-- 页面指示器 -->
+        <div class="indicator">
+            <div class="dot active" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+            <div class="dot" data-index="4"></div>
+            <div class="dot" data-index="5"></div>
+            <div class="dot" data-index="6"></div>
+            <div class="dot" data-index="7"></div>
+            <div class="dot" data-index="8"></div>
+            <div class="dot" data-index="9"></div>
+            <div class="dot" data-index="10"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentSlide = 1;
+            const totalSlides = 10;
+            const prevBtn = document.querySelector('.prev');
+            const nextBtn = document.querySelector('.next');
+            const dots = document.querySelectorAll('.dot');
+            
+            // 初始化第一页动画
+            activateSlideAnimations(currentSlide);
+            
+            function showSlide(n) {
+                // 隐藏当前幻灯片
+                document.querySelector(`.slide-${currentSlide}`).classList.remove('active');
+                document.querySelector(`.dot[data-index="${currentSlide}"]`).classList.remove('active');
+                
+                // 更新当前幻灯片索引
+                currentSlide = n;
+                
+                // 如果索引超出范围，重置
+                if (currentSlide > totalSlides) currentSlide = 1;
+                if (currentSlide < 1) currentSlide = totalSlides;
+                
+                // 显示新的当前幻灯片
+                document.querySelector(`.slide-${currentSlide}`).classList.add('active');
+                document.querySelector(`.dot[data-index="${currentSlide}"]`).classList.add('active');
+                
+                // 触发当前幻灯片的动画
+                activateSlideAnimations(currentSlide);
+            }
+            
+            function activateSlideAnimations(slideIndex) {
+                const currentSlideElement = document.querySelector(`.slide-${slideIndex}`);
+                
+                // 重置之前可能的动画状态
+                const h1Elements = currentSlideElement.querySelectorAll('h1');
+                const h2Elements = currentSlideElement.querySelectorAll('h2');
+                const pElements = currentSlideElement.querySelectorAll('p');
+                const characterItems = currentSlideElement.querySelectorAll('.character-item');
+                const cultivationLevels = currentSlideElement.querySelectorAll('.cultivation-level');
+                const worldMap = currentSlideElement.querySelector('.world-map');
+                const locations = currentSlideElement.querySelectorAll('.location');
+                const quotes = currentSlideElement.querySelectorAll('.quote');
+                const timelineElement = currentSlideElement.querySelector('.timeline');
+                const timelineItems = currentSlideElement.querySelectorAll('.timeline-item');
+                const artifacts = currentSlideElement.querySelectorAll('.artifact');
+                
+                // 应用通用动画
+                h1Elements.forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-50px)';
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 100);
+                });
+                
+                h2Elements.forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-30px)';
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 300);
+                });
+                
+                pElements.forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 500);
+                });
+                
+                // 特定幻灯片的动画
+                if (characterItems.length > 0) {
+                    characterItems.forEach((item, index) => {
+                        item.style.opacity = '0';
+                        item.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'scale(1)';
+                        }, 700 + index * 100);
+                    });
+                }
+                
+                if (cultivationLevels.length > 0) {
+                    cultivationLevels.forEach((level, index) => {
+                        level.style.opacity = '0';
+                        level.style.transform = 'translateX(-50px)';
+                        setTimeout(() => {
+                            level.style.opacity = '1';
+                            level.style.transform = 'translateX(0)';
+                        }, 700 + index * 150);
+                    });
+                }
+                
+                if (worldMap) {
+                    worldMap.style.opacity = '0';
+                    worldMap.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        worldMap.style.opacity = '1';
+                        worldMap.style.transform = 'scale(1)';
+                    }, 700);
+                }
+                
+                if (locations.length > 0) {
+                    locations.forEach((location, index) => {
+                        location.style.opacity = '0';
+                        location.style.transform = 'scale(0)';
+                        setTimeout(() => {
+                            location.style.opacity = '1';
+                            location.style.transform = 'scale(1)';
+                        }, 1000 + index * 200);
+                    });
+                }
+                
+                if (quotes.length > 0) {
+                    quotes.forEach((quote, index) => {
+                        quote.style.opacity = '0';
+                        quote.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            quote.style.opacity = '1';
+                            quote.style.transform = 'scale(1)';
+                        }, 700 + index * 300);
+                    });
+                }
+                
+                if (timelineElement) {
+                    const timelineLine = timelineElement.querySelector('::before');
+                    if (timelineLine) {
+                        timelineElement.style.setProperty('--height', '100%');
+                    }
+                }
+                
+                if (timelineItems.length > 0) {
+                    timelineItems.forEach((item, index) => {
+                        item.style.opacity = '0';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            if (index % 2 === 0) {
+                                item.style.transform = 'translateX(0)';
+                            } else {
+                                item.style.transform = 'translateX(0)';
+                            }
+                        }, 800 + index * 200);
+                    });
+                }
+                
+                if (artifacts.length > 0) {
+                    artifacts.forEach((artifact, index) => {
+                        artifact.style.opacity = '0';
+                        artifact.style.transform = 'rotateY(90deg)';
+                        setTimeout(() => {
+                            artifact.style.opacity = '1';
+                            artifact.style.transform = 'rotateY(0)';
+                        }, 700 + index * 150);
+                    });
+                }
+            }
+            
+            // 事件监听器
+            prevBtn.addEventListener('click', () => {
+                showSlide(currentSlide - 1);
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                showSlide(currentSlide + 1);
+            });
+            
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const slideIndex = parseInt(dot.getAttribute('data-index'));
+                    showSlide(slideIndex);
+                });
+            });
+            
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    showSlide(currentSlide - 1);
+                } else if (e.key === 'ArrowRight') {
+                    showSlide(currentSlide + 1);
+                }
+            });
+            
+            // 设置时间线高度动画
+            const timelines = document.querySelectorAll('.timeline');
+            timelines.forEach(timeline => {
+                timeline.addEventListener('transitionend', function() {
+                    this.style.height = '100%';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
