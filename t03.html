@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成型智能排产过程梳理</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/theme/white.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c5282;
+            --secondary-color: #4299e1;
+            --accent-color: #f6ad55;
+            --text-color: #2d3748;
+            --light-bg: #f7fafc;
+            --dark-bg: #1a202c;
+            --success-color: #48bb78;
+            --warning-color: #ecc94b;
+            --danger-color: #f56565;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+        }
+        
+        .reveal {
+            font-size: 2.2vh;
+        }
+        
+        .reveal h1 {
+            font-size: 5vh;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 4vh;
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .reveal h2 {
+            font-size: 3.6vh;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 3vh;
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .reveal h3 {
+            font-size: 2.8vh;
+            font-weight: 500;
+            color: var(--secondary-color);
+            margin-bottom: 2vh;
+        }
+        
+        .reveal p {
+            line-height: 1.6;
+            margin-bottom: 1.5vh;
+        }
+        
+        .reveal ul, .reveal ol {
+            display: inline-block;
+            text-align: left;
+            margin: 0 0 0 1.5em;
+            line-height: 1.6;
+        }
+        
+        .reveal li {
+            margin-bottom: 1vh;
+        }
+        
+        .reveal section {
+            height: 100%;
+            padding: 2vh;
+        }
+        
+        .reveal .slides {
+            text-align: left;
+        }
+
+        .reveal .slides section {
+            height: 90vh;
+            overflow: hidden;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 2vh;
+            margin: 2vh 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-header {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.5vh;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header i {
+            margin-right: 1vh;
+        }
+        
+        /* 布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+            gap: 2vh;
+            width: 100%;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-2 {
+            gap: 2vh;
+        }
+        
+        /* 封面 */
+        .cover {
+            text-align: center;
+            background: linear-gradient(135deg, #2c5282 0%, #4299e1 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cover h1 {
+            color: white;
+            font-size: 6vh;
+            margin-bottom: 2vh;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cover p {
+            font-size: 3vh;
+            margin-top: 2vh;
+            opacity: 0.9;
+        }
+        
+        /* 流程图样式 */
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 4vh 0;
+            flex-wrap: wrap;
+        }
+        
+        .process-step {
+            flex: 1;
+            min-width: 20%;
+            text-align: center;
+            padding: 0 1vh;
+            position: relative;
+        }
+        
+        .process-step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 3vh;
+            right: -1vh;
+            width: 2vh;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+        
+        .step-number {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 6vh;
+            height: 6vh;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            font-size: 2.5vh;
+            margin-bottom: 1.5vh;
+        }
+        
+        .step-description {
+            font-size: 1.8vh;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2vh 0;
+            font-size: 1.8vh;
+        }
+        
+        .data-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.2vh;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 1.2vh;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        /* 颜色标记 */
+        .highlight-green {
+            background-color: rgba(72, 187, 120, 0.2);
+            padding: 0.2vh 0.5vh;
+            border-radius: 3px;
+            border: 1px solid rgba(72, 187, 120, 0.4);
+        }
+        
+        .highlight-yellow {
+            background-color: rgba(236, 201, 75, 0.2);
+            padding: 0.2vh 0.5vh;
+            border-radius: 3px;
+            border: 1px solid rgba(236, 201, 75, 0.4);
+        }
+        
+        .highlight-red {
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+        
+        /* 图标和标记 */
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4vh;
+            height: 4vh;
+            border-radius: 0.5vh;
+            background-color: rgba(66, 153, 225, 0.1);
+            color: var(--secondary-color);
+            margin-right: 1vh;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 0.4vh 1vh;
+            border-radius: 4px;
+            font-size: 1.6vh;
+            font-weight: 500;
+            margin-right: 1vh;
+        }
+        
+        .tag-blue {
+            background-color: rgba(66, 153, 225, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .tag-orange {
+            background-color: rgba(246, 173, 85, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .tag-green {
+            background-color: rgba(72, 187, 120, 0.1);
+            color: var(--success-color);
+        }
+        
+        /* JSON展示 */
+        .json-display {
+            background-color: #1a202c;
+            color: #f7fafc;
+            border-radius: 8px;
+            padding: 2vh;
+            font-family: monospace;
+            overflow: auto;
+            max-height: 40vh;
+            font-size: 1.8vh;
+        }
+        
+        .json-key {
+            color: #f6ad55;
+        }
+        
+        .json-string {
+            color: #68d391;
+        }
+        
+        .json-boolean {
+            color: #63b3ed;
+        }
+        
+        /* 进度指示器 */
+        .progress-indicator {
+            position: fixed;
+            bottom: 1vh;
+            left: 2vh;
+            z-index: 100;
+            font-size: 1.6vh;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        
+        /* 响应式调整 */
+        @media (max-height: 700px) {
+            .reveal {
+                font-size: 2vh;
+            }
+            
+            .reveal h1 {
+                font-size: 4vh;
+            }
+            
+            .reveal h2 {
+                font-size: 3vh;
+            }
+            
+            .reveal h3 {
+                font-size: 2.4vh;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-flow {
+                flex-direction: column;
+            }
+            
+            .process-step {
+                margin-bottom: 3vh;
+                width: 100%;
+            }
+            
+            .process-step:not(:last-child)::after {
+                display: none;
+            }
+        }
+        
+        /* 界面模拟 */
+        .ui-mockup {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 2vh 0;
+        }
+        
+        .ui-header {
+            background-color: #f8fafc;
+            padding: 1.5vh;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ui-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .ui-body {
+            padding: 2vh;
+            background-color: white;
+        }
+        
+        .ui-section {
+            margin-bottom: 2vh;
+            padding-bottom: 2vh;
+            border-bottom: 1px solid #f0f5fa;
+        }
+        
+        .ui-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .ui-section-title {
+            font-weight: 600;
+            margin-bottom: 1vh;
+            color: var(--secondary-color);
+        }
+        
+        .ui-machine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(12vh, 1fr));
+            gap: 1vh;
+            margin-top: 1vh;
+        }
+        
+        .ui-machine {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 1vh;
+            text-align: center;
+            font-size: 1.6vh;
+        }
+        
+        .ui-machine.selected {
+            background-color: #ebf8ff;
+            border-color: var(--secondary-color);
+        }
+        
+        .ui-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.6vh;
+        }
+        
+        .ui-table th {
+            background-color: #f8fafc;
+            padding: 1vh;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .ui-table td {
+            padding: 1vh;
+            border-bottom: 1px solid #f0f5fa;
+        }
+        
+        .ui-info-box {
+            background-color: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-radius: 4px;
+            padding: 1.5vh;
+            margin: 1.5vh 0;
+        }
+        
+        .ui-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8vh 1.5vh;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 1vh;
+        }
+        
+        .ui-button.secondary {
+            background-color: #e2e8f0;
+            color: var(--text-color);
+        }
+        
+        .ui-button.success {
+            background-color: var(--success-color);
+        }
+        
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        
+        /* 自定义动画类 */
+        .reveal .slides section .fragment.fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal .slides section .fragment.fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- 封面 -->
+            <section class="cover">
+                <h1>成型智能排产过程梳理</h1>
+                <p>数字化转型助力生产排程优化</p>
+            </section>
+            
+            <!-- 概述 -->
+            <section>
+                <h2>内容概览</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-calendar-check"></i> 排产流程</div>
+                        <ul>
+                            <li>确定关键日期</li>
+                            <li>数据查询与分析</li>
+                            <li>智能排产规则应用</li>
+                            <li>生成排产计划</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-database"></i> 数据基础</div>
+                        <ul>
+                            <li>成型机生产能力</li>
+                            <li>历史生产记录</li>
+                            <li>下一工作日滤棒需求</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-brain"></i> 智能决策</div>
+                        <ul>
+                            <li>优先延续生产规格</li>
+                            <li>需求与产能平衡</li>
+                            <li>特殊设备处理</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-desktop"></i> 系统界面</div>
+                        <ul>
+                            <li>排产确认管理</li>
+                            <li>生产安排表</li>
+                            <li>需求与能力对照</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第一部分：关键日期确定 -->
+            <section>
+                <h2><i class="fas fa-calendar-alt"></i> 确定关键日期</h2>
+                <div class="card">
+                    <p>排产过程首先需要确定两个关键日期作为基础参数：</p>
+                    <div class="grid">
+                        <div class="card">
+                            <div class="card-header"><i class="fas fa-calendar"></i> 排产日期</div>
+                            <p><strong>specified_date</strong>：选择成型机的排产日期</p>
+                            <p class="tag tag-blue">当天生产计划安排基准</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><i class="fas fa-calendar-plus"></i> 下一工作日</div>
+                            <p><strong>next_date</strong>：根据周末、节假日、停产等规则确定的下一个工作日</p>
+                            <p class="tag tag-orange">用于获取卷包生产计划</p>
+                            <p class="tag tag-green">计算滤棒需求量</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第二部分：数据查询概述 -->
+            <section>
+                <h2><i class="fas fa-database"></i> 数据查询</h2>
+                <p>排产过程需要通过三个关键查询获取所需数据：</p>
+                <div class="process-flow">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <div class="step-description">成型机生产能力<br/>表A</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <div class="step-description">历史生产记录<br/>表B</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <div class="step-description">下一日滤棒需求<br/>表C</div>
+                    </div>
+                </div>
+                <div class="fragment fade-up">
+                    <p>这三项数据共同构成智能排产的基础，为算法提供决策依据。</p>
+                </div>
+            </section>
+            
+            <!-- 查询1详情 -->
+            <section>
+                <h2>查询1：成型机生产能力（表A）</h2>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cogs"></i> 数据获取与处理流程</div>
+                    <ol>
+                        <li>获取<strong>排产日期前60天</strong>内的成型机产量数据（台时14.67小时）</li>
+                        <li>建立成型机基础信息表，包含可生产滤棒规格、额定车速、实际车速等</li>
+                        <li>引入<strong>折算系数</strong>，用于不同规格滤棒（普通、中支、细支）对满格支数的差异计算</li>
+                        <li>优先使用近60天平均日产数据作为生产能力，无数据则使用标准生产能力</li>
+                        <li>考虑5%生产消耗，最终生产能力 = 原生产能力 × 95%</li>
+                    </ol>
+                </div>
+                <div class="fragment fade-up">
+                    <div class="ui-mockup">
+                        <div class="ui-header">
+                            <div class="ui-title">成型机生产能力表（样例）</div>
+                        </div>
+                        <div class="ui-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>机号</th>
+                                        <th>滤棒规格</th>
+                                        <th>额定车速</th>
+                                        <th>实际车速</th>
+                                        <th>折算系数</th>
+                                        <th>日产能力(格)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>K01</td>
+                                        <td>LBCG2600</td>
+                                        <td>8000</td>
+                                        <td>7500</td>
+                                        <td>1.0</td>
+                                        <td>228</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K01</td>
+                                        <td>LBCG2B00</td>
+                                        <td>8000</td>
+                                        <td>7300</td>
+                                        <td>1.0</td>
+                                        <td>222</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K15</td>
+                                        <td>LBCX4001</td>
+                                        <td>7500</td>
+                                        <td>7000</td>
+                                        <td>0.95</td>
+                                        <td>202</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 查询2详情 -->
+            <section>
+                <h2>查询2：成型机历史生产记录（表B）</h2>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-history"></i> 历史数据提取流程</div>
+                    <ol>
+                        <li>筛选日期<strong>小于排产日期</strong>且滤棒规格不为空的记录</li>
+                        <li>按机号分组，记录按日期降序、班次优先级排序（<strong>中班>早班</strong>）</li>
+                        <li>选取每组<strong>第一条记录</strong>，获取每台成型机最近生产的滤棒规格</li>
+                    </ol>
+                </div>
+                <div class="fragment fade-up">
+                    <div class="ui-mockup">
+                        <div class="ui-header">
+                            <div class="ui-title">成型机前一次生产规格记录（样例）</div>
+                        </div>
+                        <div class="ui-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>机号</th>
+                                        <th>最近生产日期</th>
+                                        <th>班次</th>
+                                        <th>生产规格</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>K01</td>
+                                        <td>2025-04-11</td>
+                                        <td>中班</td>
+                                        <td><span class="highlight-green">LBCG2600</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>K15</td>
+                                        <td>2025-04-11</td>
+                                        <td>早班</td>
+                                        <td><span class="highlight-green">LBCX4001</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>K16</td>
+                                        <td>2025-04-10</td>
+                                        <td>中班</td>
+                                        <td><span class="highlight-green">LBCG2B00</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 查询3详情 -->
+            <section>
+                <h2>查询3：下一工作日滤棒需求（表C）</h2>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-line"></i> 需求计算流程</div>
+                    <ol>
+                        <li>获取<strong>下一工作日</strong>的卷烟机生产计划</li>
+                        <li>根据计划<strong>计算对应滤棒规格需求量</strong></li>
+                        <li>按滤棒规格汇总需求量，得到各规格的滤棒需求格数</li>
+                    </ol>
+                </div>
+                <div class="fragment fade-up">
+                    <div class="ui-mockup">
+                        <div class="ui-header">
+                            <div class="ui-title">下一工作日滤棒需求（样例）</div>
+                        </div>
+                        <div class="ui-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>滤棒规格</th>
+                                        <th>滤棒名称</th>
+                                        <th>需求量(格)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>LBCG2600</td>
+                                        <td>普通滤棒A</td>
+                                        <td>450</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCG2B00</td>
+                                        <td>普通滤棒B</td>
+                                        <td>380</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCX4001</td>
+                                        <td>细支滤棒C</td>
+                                        <td>220</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第三部分：排产规则 -->
+            <section data-background-color="#f8fafc">
+                <h2><i class="fas fa-clipboard-list"></i> 排产规则与背景</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-clock"></i> 生产背景</div>
+                        <ul>
+                            <li>车间生产分为<strong>早班</strong>（7.67小时）和<strong>中班</strong>（7小时）</li>
+                            <li>日工作时间14.67小时，日产指全天产出量</li>
+                            <li>产量单位为"格"</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-balance-scale"></i> 产能规划</div>
+                        <ul>
+                            <li>部分机组可切换不同滤棒规格生产</li>
+                            <li>早班和中班生产安排需<strong>均衡</strong></li>
+                            <li>产能不足时可外购，最大不足容忍度为<strong>5%</strong></li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-sync-alt"></i> 生产延续性</div>
+                        <ul>
+                            <li><strong>优先</strong>安排与前一次相同规格的滤棒</li>
+                            <li>避免频繁更换规格，减少生产中的浪费</li>
+                            <li>只在必要情况下更换生产规格</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-exclamation-triangle"></i> 特殊规则</div>
+                        <ul>
+                            <li>K01、K15、K16机组较为老旧，<strong>非必要不安排</strong>生产</li>
+                            <li>每台设备一天内只能安排一次早班和中班</li>
+                            <li>产量不足一个班时，可只安排早班，中班停机</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第四部分：大模型调用 -->
+            <section>
+                <h2><i class="fas fa-robot"></i> 大模型调用与排产生成</h2>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cogs"></i> 排产流程</div>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-description">准备输入<br>表A、B、C和规则</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-description">调用大模型<br>生成排产方案</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-description">解析结果<br>JSON格式</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-description">存储结果<br>写入数据库</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fragment fade-up">
+                    <h3>排产结果示例</h3>
+                    <div class="json-display">
+<span class="json-key">[</span>
+  <span class="json-key">{</span>
+    <span class="json-key">"机号"</span>: <span class="json-string">"K01"</span>,
+    <span class="json-key">"班次"</span>: <span class="json-string">"早班"</span>,
+    <span class="json-key">"生产规格"</span>: <span class="json-string">"LBCG2600"</span>,
+    <span class="json-key">"是否延续"</span>: <span class="json-string">"是"</span>
+  <span class="json-key">}</span>,
+  <span class="json-key">{</span>
+    <span class="json-key">"机号"</span>: <span class="json-string">"K01"</span>,
+    <span class="json-key">"班次"</span>: <span class="json-string">"中班"</span>,
+    <span class="json-key">"生产规格"</span>: <span class="json-string">"LBCG2B00"</span>,
+    <span class="json-key">"是否延续"</span>: <span class="json-string">"否"</span>
+  <span class="json-key">}</span>
+<span class="json-key">]</span>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第五部分：成型机排产管理界面 -->
+            <section>
+                <h2><i class="fas fa-desktop"></i> 成型机排产管理页面</h2>
+                <p>排产管理界面分为三个主要模块，自上而下依次为：</p>
+                <div class="ui-mockup">
+                    <div class="ui-section">
+                        <div class="ui-section-title"><i class="fas fa-check-circle"></i> 1. 成型机组排产确认</div>
+                        <p>包含日历（支持选择日期和班次）和各成型机在选定日期/班次的生产安排展示。</p>
+                    </div>
+                    <div class="ui-section">
+                        <div class="ui-section-title"><i class="fas fa-table"></i> 2. 成型生产安排表</div>
+                        <p>展示所有成型机组可生产的滤棒规格及其生产能力（当班可生产格数）。</p>
+                        <ul>
+                            <li><span class="highlight-green">绿色框</span>：标记该成型机上次生产的滤棒规格。</li>
+                            <li><span class="highlight-yellow">黄色底</span>：表示当前排产的滤棒规格。</li>
+                        </ul>
+                    </div>
+                    <div class="ui-section">
+                        <div class="ui-section-title"><i class="fas fa-balance-scale"></i> 3. 卷烟滤棒需求与成型生产能力对照表</div>
+                        <p>以表格形式呈现滤棒规格、名称、需求量、生产量、相差值等关键指标。</p>
+                        <ul>
+                            <li>需求量：根据班次区分，早班 = 下一工作日需求量*7.67/14.67；中班 = 下一工作日需求量*7/14.67</li>
+                            <li>生产量：当班已排产（预排）的滤棒生产量</li>
+                            <li>相差值：生产量 - 需求量，大于0表示满足需求，小于0表示生产不足</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第六部分：排产界面模拟 -->
+            <section>
+                <h2><i class="fas fa-tv"></i> 排产界面模拟</h2>
+                <div class="ui-mockup">
+                    <div class="ui-header">
+                        <div class="ui-title">成型机排产管理系统</div>
+                        <div>
+                            <span class="ui-button">AI智能排产</span>
+                            <span class="ui-button secondary">手动排产</span>
+                        </div>
+                    </div>
+                    <div class="ui-body">
+                        <div class="ui-section">
+                            <div class="ui-section-title">成型机组排产确认（2025-04-12 早班）</div>
+                            <div class="ui-machine-grid">
+                                <div class="ui-machine selected">K01<br>LBCG2600</div>
+                                <div class="ui-machine">K02<br>待排</div>
+                                <div class="ui-machine selected">K03<br>LBCG2B00</div>
+                                <div class="ui-machine">K04<br>待排</div>
+                                <div class="ui-machine selected">K05<br>LBCX4001</div>
+                                <div class="ui-machine">K06<br>待排</div>
+                                <div class="ui-machine">...</div>
+                            </div>
+                        </div>
+                        <div class="ui-section">
+                            <div class="ui-section-title">成型生产安排表</div>
+                            <table class="ui-table">
+                                <thead>
+                                    <tr>
+                                        <th>机号</th>
+                                        <th>LBCG2600</th>
+                                        <th>LBCG2B00</th>
+                                        <th>LBCX4001</th>
+                                        <th>...</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>K01</td>
+                                        <td class="highlight-green highlight-yellow">118</td>
+                                        <td>116</td>
+                                        <td>不可生产</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K03</td>
+                                        <td>120</td>
+                                        <td class="highlight-green highlight-yellow">115</td>
+                                        <td>105</td>
+                                        <td>...</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K05</td>
+                                        <td>不可生产</td>
+                                        <td>不可生产</td>
+                                        <td class="highlight-green highlight-yellow">108</td>
+                                        <td>...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="ui-section">
+                            <div class="ui-section-title">卷烟滤棒需求与成型生产能力对照表</div>
+                            <table class="ui-table">
+                                <thead>
+                                    <tr>
+                                        <th>滤棒规格</th>
+                                        <th>滤棒名称</th>
+                                        <th>需求量</th>
+                                        <th>生产量</th>
+                                        <th>相差值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>LBCG2600</td>
+                                        <td>普通滤棒A</td>
+                                        <td>235</td>
+                                        <td>118</td>
+                                        <td class="highlight-red">-117</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCG2B00</td>
+                                        <td>普通滤棒B</td>
+                                        <td>198</td>
+                                        <td>115</td>
+                                        <td class="highlight-red">-83</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LBCX4001</td>
+                                        <td>细支滤棒C</td>
+                                        <td>115</td>
+                                        <td>108</td>
+                                        <td class="highlight-red">-7</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="ui-info-box">
+                            <strong>系统提示：</strong> 早班排产仍有缺口，请继续安排生产或考虑外购方案。
+                        </div>
+                        <div style="text-align: right; margin-top: 1vh;">
+                            <span class="ui-button success">排产确认</span>
+                            <span class="ui-button secondary">取消</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 第七部分：排产操作流程 -->
+            <section>
+                <h2><i class="fas fa-tasks"></i> 排产操作流程</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-hand-pointer"></i> 人工快速排产</div>
+                        <ol>
+                            <li>选择日期和班次</li>
+                            <li>【对照表】显示各滤棒规格需求量</li>
+                            <li>点击需要排产的滤棒规格（变为红字提示）</li>
+                            <li>优先选择绿色框（上次生产）的成型机</li>
+                            <li>点击确认后底色变为黄色，表示预排</li>
+                            <li>对照表数据动态更新，直至满足需求</li>
+                            <li>点击【排产确认】完成操作</li>
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-robot"></i> AI智能排产</div>
+                        <ol>
+                            <li>选择日期和班次</li>
+                            <li>点击【AI智能排产】按钮</li>
+                            <li>AI自动生成预排结果</li>
+                            <li>管理人员可进行微调</li>
+                            <li>针对相差值过高/过低的规格进行调整</li>
+                            <li>调整至满意后点击【排产确认】</li>
+                            <li>结果显示在排产确认界面</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="fragment fade-up">
+                    <div class="ui-info-box">
+                        <p><strong>数字化转型价值：</strong></p>
+                        <ul>
+                            <li>大幅降低专业人员排产工作量，提高排产效率</li>
+                            <li>确保生产延续性和规格满足率</li>
+                            <li>优化设备利用率，减少浪费</li>
+                            <li>使复杂的专业排产工作变为简单的日常操作</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 总结 -->
+            <section>
+                <h2><i class="fas fa-chart-line"></i> 智能排产系统价值</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-brain"></i> 智能决策</div>
+                        <ul>
+                            <li>自动平衡生产需求与产能</li>
+                            <li>遵循生产延续性原则</li>
+                            <li>考虑特殊设备限制</li>
+                            <li>自动处理产能不足情况</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-tachometer-alt"></i> 效率提升</div>
+                        <ul>
+                            <li>排产时间从小时级缩短至分钟级</li>
+                            <li>减少人工排产错误</li>
+                            <li>缓解专业人才依赖</li>
+                            <li>加速生产计划变更响应</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-chart-pie"></i> 资源优化</div>
+                        <ul>
+                            <li>降低设备空转时间</li>
+                            <li>减少规格切换损耗</li>
+                            <li>提高整体设备利用率</li>
+                            <li>合理安排老旧设备使用</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-clipboard-check"></i> 流程优化</div>
+                        <ul>
+                            <li>简化操作流程</li>
+                            <li>可视化决策过程</li>
+                            <li>降低专业门槛</li>
+                            <li>实现数字化转型目标</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 结束页 -->
+            <section class="cover">
+                <h1>谢谢观看</h1>
+                <p>智能排产系统 · 助力生产效率提升</p>
+            </section>
+        </div>
+    </div>
+    <div class="progress-indicator">
+        <span id="current-slide">1</span>/<span id="total-slides">12</span>
+    </div>
+    
+    <script>
+        // 初始化Reveal
+        let deck = new Reveal({
+            hash: true,
+            slideNumber: false,
+            center: false,
+            progress: true,
+            controls: true,
+            controlsLayout: 'bottom-right',
+            controlsBackArrows: 'faded',
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            fragments: true,
+            fragmentInURL: true,
+            overview: true,
+            keyboard: true,
+            touch: true,
+            embedded: false,
+            width: '100%',
+            height: '100%',
+            margin: 0,
+            minScale: 0.2,
+            maxScale: 2.0
+        });
+        
+        deck.initialize();
+        
+        // 更新进度指示器
+        const updateIndicator = () => {
+            const totalSlides = document.querySelectorAll('.reveal .slides > section').length;
+            const currentSlide = deck.getIndices().h + 1;
+            document.getElementById('current-slide').textContent = currentSlide;
+            document.getElementById('total-slides').textContent = totalSlides;
+        };
+        
+        deck.addEventListener('slidechanged', updateIndicator);
+        deck.addEventListener('ready', updateIndicator);
+        
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { 
+                useMaxWidth: true, 
+                htmlLabels: true 
+            }
+        });
+        
+        // 监听窗口尺寸变化，调整内容以适应屏幕
+        window.addEventListener('resize', () => {
+            // 确保内容高度不超过屏幕
+            const slides = document.querySelectorAll('.reveal .slides section');
+            const viewHeight = window.innerHeight;
+            
+            slides.forEach(slide => {
+                const slideHeight = slide.scrollHeight;
+                if (slideHeight > viewHeight * 0.9) {
+                    slide.style.fontSize = ((viewHeight * 0.9) / slideHeight * 100) + '%';
+                }
+            });
+        });
+        
+        // 初始调整
+        window.dispatchEvent(new Event('resize'));
+    </script>
+</body>
+</html>
